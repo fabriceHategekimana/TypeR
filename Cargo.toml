@@ -1,0 +1,11 @@
+[workspace]
+members = [ 
+	"main",
+	"logical",
+	"base_language",
+	"integer",
+	"double",
+	"character",
+	"complex",
+	"value",
+]
