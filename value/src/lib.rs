@@ -1,6 +1,10 @@
 use nom::branch::alt;
+use nom::bytes::complete::tag;
+use nom::sequence::{tuple, preceded};
+use nom::character::complete::alphanumeric1;
+use nom::multi::many1;
 use nom::IResult;
-use base_language::{Language};
+use base_language::{Language, Type};
 use logical::parse_logical;
 use integer::parse_integer;
 use double::parse_double;
@@ -15,6 +19,47 @@ fn parse_value(s: &str) -> IResult<&str, Language> {
             parse_logical,
             parse_character
         ))(s)
+}
+
+fn parse_symbol(s: &str) -> IResult<&str, Language> {
+    let res = alphanumeric1(s);
+    match res {
+        Ok((s, n)) => Ok((s, Language::Symbol(n.to_string(), Type::Any))),
+        Err(r) => Err(r)
+    }
+}
+
+fn parse_vector_argument(s: &str) ->  IResult<&str, Language> {
+    alt((
+        parse_value,
+        parse_symbol))(s)
+}
+
+fn parse_comma_vector_argument(s: &str) -> IResult<&str, Language> {
+    preceded(tag(","), parse_vector_argument)(s)
+}
+
+fn parse_vector_arguments(s: &str) -> IResult<&str, Language> {
+    let res = many1(alt((
+            parse_comma_vector_argument,
+            parse_vector_argument
+              )))(s);
+    match res {
+        Ok((s, v)) => Ok((s, Language::VectorArguments(v, Type::Any))),
+        Err(r) => Err(r)
+    }
+}
+
+fn parse_vector(s: &str) -> IResult<&str, Language> {
+    let res = tuple((
+            tag("c("),
+            parse_vector_arguments,
+            tag(")")
+          ))(s);
+    match res {
+        Ok((s, (o, a, c))) => Ok((s, Language::Vector(format!("{}{}{}", o, a.get_name(), c), a.infer_type()))),
+        Err(r) => Err(r)
+    }
 }
 
 #[cfg(test)]
