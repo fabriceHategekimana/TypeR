@@ -10,7 +10,7 @@ pub enum Language {
     Assignement(Name, Type),
     Symbol(Name, Type),
     VectorArguments(Vec<Language>, Type),
-    Vector(Name, Type),
+    ListArguments(Vec<Language>, Type),
 }
 
 fn join_arguments(v: &Vec<Language>) -> String {
@@ -25,27 +25,27 @@ impl Language {
             Language::Assignement(n, t) => n.to_owned(),
             Language::Symbol(n, t) => n.to_owned(),
             Language::VectorArguments(v, t) => join_arguments(&v),
-            Language::Vector(n, t) => n.to_owned(),
+            Language::ListArguments(v, t) => join_arguments(&v),
         }
     }
 
-    fn get_type(&self) -> BaseType {
+    fn get_type(&self) -> Type {
         match self {
             Language::Value(n, t) => t.clone(),
             Language::Call(n, t) => t.clone(),
             Language::Assignement(n, t) => t.clone(),
             Language::Symbol(n, t) => t.clone(),
             Language::VectorArguments(v, t) => t.clone(),
-            Language::Vector(n, t) => t.clone(),
+            Language::ListArguments(v, t) => t.clone(),
         }
     }
 
     // TODO find algorithm to infer the real type of the vector
-    fn infer_type_helper(v: &Vec<Language>) -> BaseType {
-        BaseType::Any
+    fn infer_type_helper(v: &Vec<Language>) -> Type {
+        Type::Scalar(BaseType::Any)
     }
 
-    pub fn infer_type(&self) -> BaseType {
+    pub fn infer_type(&self) -> Type {
         match self {
             Language::VectorArguments(v, t) => Self::infer_type_helper(&v),
             l => l.get_type()
@@ -65,8 +65,8 @@ pub enum BaseType {
     Null,
 }
 
-#[derive(PartialEq, Debug)]
-enum Type {
+#[derive(PartialEq, Debug, Clone)]
+pub enum Type {
     Scalar(BaseType),
     Vector(Box<BaseType>, Na),
     List(Box<Type>),

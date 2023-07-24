@@ -7,6 +7,14 @@ name = "base_language"
 version = "0.1.0"
 
 [[package]]
+name = "base_parser"
+version = "0.1.0"
+dependencies = [
+ "base_language",
+ "nom",
+]
+
+[[package]]
 name = "character"
 version = "0.1.0"
 dependencies = [
@@ -40,6 +48,16 @@ version = "0.1.0"
 dependencies = [
  "base_language",
  "nom",
+]
+
+[[package]]
+name = "list"
+version = "0.1.0"
+dependencies = [
+ "base_language",
+ "base_parser",
+ "nom",
+ "value",
 ]
 
 [[package]]
@@ -81,6 +99,7 @@ name = "value"
 version = "0.1.0"
 dependencies = [
  "base_language",
+ "base_parser",
  "character",
  "complex",
  "double",

@@ -9,4 +9,6 @@ members = [
 	"complex",
 	"value",
 	"checker",
+	"list",
+	"base_parser",
 ]

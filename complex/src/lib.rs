@@ -1,4 +1,4 @@
-use base_language::{Language, Type};
+use base_language::{Language, BaseType, Type};
 use nom::sequence::tuple;
 use nom::character::complete::digit1;
 use nom::combinator::opt;
@@ -34,7 +34,7 @@ pub fn parse_complex(s: &str) -> IResult<&str, Language> {
                tag("i")
                   ))(s);
     match res {
-        Ok((s, (v, i))) => Ok((s, Language::Value(format!("{}{}", v, i), Type::Complex))),
+        Ok((s, (v, i))) => Ok((s, Language::Value(format!("{}{}", v, i), Type::Scalar(BaseType::Complex)))),
         Err(e) => Err(e)
     }
 }
@@ -42,22 +42,21 @@ pub fn parse_complex(s: &str) -> IResult<&str, Language> {
 
 #[cfg(test)]
 mod tests {
-    use base_language::{Language, Type};
-    use nom;
+    use base_language::{Language, BaseType, Type};
     use super::{parse_complex, parse_real};
 
     #[test]
     fn test_complex_1() {
         assert_eq!(
             parse_complex("3i").unwrap().1,
-            Language::Value("3i".to_string(), Type::Complex));
+            Language::Value("3i".to_string(), Type::Scalar(BaseType::Complex)));
     }
 
     #[test]
     fn test_complex_2() {
         assert_eq!(
             parse_complex("251i").unwrap().1,
-            Language::Value("251i".to_string(), Type::Complex));
+            Language::Value("251i".to_string(), Type::Scalar(BaseType::Complex)));
     }
     
     #[test]

@@ -4,7 +4,7 @@ use nom::character::complete::digit1;
 use nom::bytes::complete::tag;
 use nom::branch::alt;
 use nom::IResult;
-use base_language::{Language, Type};
+use base_language::{Language, BaseType, Type};
 
 // TODO: Test digit L
 fn parse_digit_l(s: &str) -> IResult<&str, String> {
@@ -29,31 +29,31 @@ pub fn parse_integer(s: &str) -> IResult<&str, Language> {
             tuple((opt(tag("-")), parse_digit_1))
         ))(s);
     match res {
-        Ok((s, (Some(m), v))) => Ok((s, Language::Value(format!("{}{}", m, v), Type::Integer))),
-        Ok((s, (None, v))) => Ok((s, Language::Value(format!("{}", v), Type::Integer))),
+        Ok((s, (Some(m), v))) => Ok((s, Language::Value(format!("{}{}", m, v), Type::Scalar(BaseType::Integer)))),
+        Ok((s, (None, v))) => Ok((s, Language::Value(format!("{}", v), Type::Scalar(BaseType::Integer)))),
         Err(e) => Err(e)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use base_language::{Language, Type};
+    use base_language::{Language, BaseType, Type};
     use super::{parse_integer, parse_digit_l, parse_digit_1};
 
     #[test]
     fn test_integer1() {
         assert_eq!(
             parse_integer("7").unwrap().1,
-            Language::Value("7".to_string(), Type::Integer));
+            Language::Value("7".to_string(), Type::Scalar(BaseType::Integer)));
         assert_eq!(
             parse_integer("3L").unwrap().1,
-            Language::Value("3L".to_string(), Type::Integer));
+            Language::Value("3L".to_string(), Type::Scalar(BaseType::Integer)));
         assert_eq!(
             parse_integer("-8").unwrap().1,
-            Language::Value("-8".to_string(), Type::Integer));
+            Language::Value("-8".to_string(), Type::Scalar(BaseType::Integer)));
         assert_eq!(
             parse_integer("-8L").unwrap().1,
-            Language::Value("-8L".to_string(), Type::Integer));
+            Language::Value("-8L".to_string(), Type::Scalar(BaseType::Integer)));
     }
 
     #[test]

@@ -1,5 +1,5 @@
 use nom::IResult;
-use base_language::{Language, Type};
+use base_language::{Language, BaseType, Type};
 use nom::bytes::complete::{tag, take_until};
 use nom::sequence::tuple;
 
@@ -10,14 +10,14 @@ pub fn parse_character(s: &str) -> IResult<&str, Language> {
             tag("\"")
                   ))(s);
     match res {
-        Ok((s, (q1, v, q2))) => Ok((s, Language::Value(format!("{}{}{}", q1, v, q2), Type::Character))),
+        Ok((s, (q1, v, q2))) => Ok((s, Language::Value(format!("{}{}{}", q1, v, q2), Type::Scalar(BaseType::Character)))),
         Err(e) => Err(e)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use base_language::{Language, Type};
+    use base_language::{Language, BaseType, Type};
     use super::parse_character;
     use nom;
 
@@ -25,7 +25,7 @@ mod tests {
     fn test_character() {
         assert_eq!(
             parse_character("\"Hello\"").unwrap().1,
-            Language::Value("\"Hello\"".to_string(), Type::Character));
+            Language::Value("\"Hello\"".to_string(), Type::Scalar(BaseType::Character)));
     }
 
     #[test]
