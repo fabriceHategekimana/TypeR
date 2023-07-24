@@ -1,6 +1,7 @@
 #![allow(dead_code, unused_variables, unused_imports, unreachable_code)]
 
 type Name = String;
+type Na = bool;
 
 #[derive(PartialEq, Debug)]
 pub enum Language {
@@ -28,7 +29,7 @@ impl Language {
         }
     }
 
-    fn get_type(&self) -> Type {
+    fn get_type(&self) -> BaseType {
         match self {
             Language::Value(n, t) => t.clone(),
             Language::Call(n, t) => t.clone(),
@@ -40,11 +41,11 @@ impl Language {
     }
 
     // TODO find algorithm to infer the real type of the vector
-    fn infer_type_helper(v: &Vec<Language>) -> Type {
-        Type::Any
+    fn infer_type_helper(v: &Vec<Language>) -> BaseType {
+        BaseType::Any
     }
 
-    pub fn infer_type(&self) -> Type {
+    pub fn infer_type(&self) -> BaseType {
         match self {
             Language::VectorArguments(v, t) => Self::infer_type_helper(&v),
             l => l.get_type()
@@ -54,20 +55,25 @@ impl Language {
 
 // TODO solve problem with Vector of vector (can't be vec of vec)
 #[derive(PartialEq, Debug, Clone)]
-pub enum Type {
+pub enum BaseType {
     Logical,
     Integer,
     Double,
     Character,
     Complex,
     Any,
-    Vector(Box<Type>)
+    Null,
 }
 
 #[derive(PartialEq, Debug)]
-enum TypeError {
-    field
+enum Type {
+    Scalar(BaseType),
+    Vector(Box<BaseType>, Na),
+    List(Box<Type>),
+    Union(Box<Type>),
+    Function(Vec<Type>, Box<Type>)
 }
+
 
 #[cfg(test)]
 mod tests {
@@ -76,7 +82,7 @@ mod tests {
     #[test]
     fn test(){
         assert_eq!(
-            Language::Value("hey".to_string(), Type::Logical).get_name(),
+            Language::Value("hey".to_string(), BaseType::Logical).get_name(),
             "hey".to_string()
             );
     }
