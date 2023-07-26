@@ -13,7 +13,6 @@ members = [
 	"base_parser",
 	"function",
 	"union",
-	"assignment",
 	"vector",
 	"expression",
 	"scope",

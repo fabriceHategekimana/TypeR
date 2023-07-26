@@ -3,17 +3,6 @@
 version = 3
 
 [[package]]
-name = "assignment"
-version = "0.1.0"
-dependencies = [
- "base_language",
- "base_parser",
- "expression",
- "nom",
- "value",
-]
-
-[[package]]
 name = "base_language"
 version = "0.1.0"
 
@@ -41,8 +30,8 @@ version = "0.1.0"
 name = "command"
 version = "0.1.0"
 dependencies = [
- "assignment",
  "base_language",
+ "base_parser",
  "expression",
  "nom",
  "union",
@@ -142,7 +131,6 @@ dependencies = [
 name = "scope"
 version = "0.1.0"
 dependencies = [
- "assignment",
  "base_language",
  "base_parser",
  "command",

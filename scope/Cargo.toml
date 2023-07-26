@@ -10,5 +10,4 @@ base_language = { path = "../base_language" }
 nom = "7.1.3"
 base_parser = { path = "../base_parser" }
 expression = { path = "../expression" }
-assignment = { path = "../assignment" }
 command = { path = "../command" }
