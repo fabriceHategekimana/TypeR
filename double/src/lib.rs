@@ -28,17 +28,17 @@ pub fn parse_double(s: &str) -> IResult<&str, Language> {
 
 #[cfg(test)]
 mod tests {
-    use base_language::{Language, BaseType};
+    use base_language::{Language, BaseType, Type};
     use super::parse_double;
 
     #[test]
     fn test_double() {
         assert_eq!(
             parse_double("3.2").unwrap().1,
-            Language::Value("3.2".to_string(), BaseType::Double));
+            Language::Value("3.2".to_string(), Type::Scalar(BaseType::Double)));
         assert_eq!(
             parse_double("-8.9").unwrap().1,
-            Language::Value("-8.9".to_string(), BaseType::Double));
+            Language::Value("-8.9".to_string(), Type::Scalar(BaseType::Double)));
     }
 
 }

@@ -1,15 +1,11 @@
 use nom::branch::alt;
-use nom::bytes::complete::tag;
-use nom::sequence::{tuple, preceded};
-use nom::multi::many1;
 use nom::IResult;
-use base_language::{Language, BaseType, Type};
+use base_language::{Language};
 use logical::parse_logical;
 use integer::parse_integer;
 use double::parse_double;
 use complex::parse_complex;
 use character::parse_character;
-use base_parser::parse_symbol;
 
 pub fn parse_value(s: &str) -> IResult<&str, Language> {
     alt((
@@ -21,43 +17,12 @@ pub fn parse_value(s: &str) -> IResult<&str, Language> {
         ))(s)
 }
 
-fn parse_vector_argument(s: &str) ->  IResult<&str, Language> {
-    alt((
-        parse_value,
-        parse_symbol))(s)
-}
-
-fn parse_comma_vector_argument(s: &str) -> IResult<&str, Language> {
-    preceded(tag(","), parse_vector_argument)(s)
-}
-
-fn parse_vector_arguments(s: &str) -> IResult<&str, Language> {
-    let res = many1(alt((
-            parse_comma_vector_argument,
-            parse_vector_argument
-              )))(s);
-    match res {
-        Ok((s, v)) => Ok((s, Language::VectorArguments(v, Type::Scalar(BaseType::Any)))),
-        Err(r) => Err(r)
-    }
-}
-
-pub fn parse_vector(s: &str) -> IResult<&str, Language> {
-    let res = tuple((
-            tag("c("),
-            parse_vector_arguments,
-            tag(")")
-          ))(s);
-    match res {
-        Ok((s, (_, a, _))) => Ok((s, a)),
-        Err(r) => Err(r)
-    }
-}
-
 #[cfg(test)]
+
+
 mod tests {
-    use super::parse_value;
-    use base_language::{Language, BaseType};
+    use super::*;
+    use base_language::{Type, BaseType};
 
     #[test]
     fn test_character() {
@@ -105,11 +70,11 @@ mod tests {
     fn test_values(){
         assert_eq!(
             parse_value("TRUE").unwrap().1,
-            Language::Value("TRUE".to_string(), BaseType::Logical)
+            Language::Value("TRUE".to_string(), Type::Scalar(BaseType::Logical))
            ); 
         assert_eq!(
             parse_value("FALSE").unwrap().1,
-            Language::Value("FALSE".to_string(), BaseType::Logical)
+            Language::Value("FALSE".to_string(), Type::Scalar(BaseType::Logical))
            ); 
     }
 

@@ -3,6 +3,17 @@
 version = 3
 
 [[package]]
+name = "assignment"
+version = "0.1.0"
+dependencies = [
+ "base_language",
+ "base_parser",
+ "expression",
+ "nom",
+ "value",
+]
+
+[[package]]
 name = "base_language"
 version = "0.1.0"
 
@@ -27,6 +38,17 @@ name = "checker"
 version = "0.1.0"
 
 [[package]]
+name = "command"
+version = "0.1.0"
+dependencies = [
+ "assignment",
+ "base_language",
+ "expression",
+ "nom",
+ "union",
+]
+
+[[package]]
 name = "complex"
 version = "0.1.0"
 dependencies = [
@@ -40,6 +62,27 @@ version = "0.1.0"
 dependencies = [
  "base_language",
  "nom",
+]
+
+[[package]]
+name = "expression"
+version = "0.1.0"
+dependencies = [
+ "base_language",
+ "list",
+ "nom",
+ "value",
+ "vector",
+]
+
+[[package]]
+name = "function"
+version = "0.1.0"
+dependencies = [
+ "base_language",
+ "base_parser",
+ "nom",
+ "scope",
 ]
 
 [[package]]
@@ -58,6 +101,7 @@ dependencies = [
  "base_parser",
  "nom",
  "value",
+ "vector",
 ]
 
 [[package]]
@@ -95,6 +139,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "scope"
+version = "0.1.0"
+dependencies = [
+ "assignment",
+ "base_language",
+ "base_parser",
+ "command",
+ "expression",
+ "nom",
+]
+
+[[package]]
+name = "union"
+version = "0.1.0"
+dependencies = [
+ "base_language",
+ "base_parser",
+ "nom",
+]
+
+[[package]]
 name = "value"
 version = "0.1.0"
 dependencies = [
@@ -106,4 +171,14 @@ dependencies = [
  "integer",
  "logical",
  "nom",
+]
+
+[[package]]
+name = "vector"
+version = "0.1.0"
+dependencies = [
+ "base_language",
+ "base_parser",
+ "nom",
+ "value",
 ]
