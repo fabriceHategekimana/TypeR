@@ -1,4 +1,5 @@
-use base_language::{Language, Type};
+use base_language::Language;
+use base_language::r#type::Type;
 use base_parser::{parse_single_or, parse_symbol, parse_type};
 use nom::multi::many1;
 use nom::branch::alt;

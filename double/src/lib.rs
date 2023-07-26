@@ -3,7 +3,8 @@ use nom::combinator::opt;
 use nom::character::complete::digit1;
 use nom::bytes::complete::tag;
 use nom::IResult;
-use base_language::{Language, BaseType, Type};
+use base_language::Language;
+use base_language::r#type::{Type, BaseType};
 
 pub fn floating_point(s: &str) -> IResult<&str, String> {
     let res = tuple((tag("."), digit1))(s);
@@ -28,7 +29,8 @@ pub fn parse_double(s: &str) -> IResult<&str, Language> {
 
 #[cfg(test)]
 mod tests {
-    use base_language::{Language, BaseType, Type};
+    use base_language::Language;
+    use base_language::r#type::{Type, BaseType};
     use super::parse_double;
 
     #[test]

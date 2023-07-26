@@ -1,21 +1,30 @@
 #![allow(dead_code, unused_variables, unused_imports, unreachable_code)]
 
+pub mod language_struct;
+pub mod symbol;
+pub mod type_name;
+pub mod r#type;
+
+use crate::language_struct::LanguageStruct;
+use crate::symbol::Symbol;
+use crate::type_name::TypeName;
+use r#type::{Type, BaseType};
+
 type Name = String;
-type Na = bool;
 
 #[derive(PartialEq, Debug)]
 pub enum Language {
     Value(Name, Type),
     Call(Name, Type),
     Assignement((Box<Language>, Box<Language>), Type),
-    Symbol(Name, Type),
-    Identifier(Box<Language>, Box<Language>),
+    Symbol(Symbol),
+    Identifier(Symbol, TypeName),
     Reserved(Name, Type),
     VectorArguments(Vec<Language>, Type),
     ListArguments(Vec<Language>, Type),
     ScopeElements(Vec<Language>, Type), // TODO: must only be symbol and reserved
     UnionArguments(Vec<Language>, Type), // TODO: must only be symbol and reserved
-    Function(Box<Language>, Box<Language>, Box<Language>, Type),
+    Function(Box<Language>, TypeName, Box<Language>, Type),
     FunctionArguments(Vec<Language>, Type),
     Empty,
 }
@@ -30,14 +39,14 @@ impl Language {
             Language::Value(n, t) => n.to_owned(),
             Language::Call(n, t) => n.to_owned(),
             Language::Assignement(n, t) => "Todo".to_string(),
-            Language::Symbol(n, t) => n.to_owned(),
+            Language::Symbol(s) => s.get_term(),
             Language::Reserved(n, t) => n.to_owned(),
             Language::VectorArguments(v, t) => join_arguments(&v),
             Language::ListArguments(v, t) => join_arguments(&v),
             Language::ScopeElements(v, t) => join_arguments(&v),
             Language::UnionArguments(v, t) => join_arguments(&v),
             Language::Empty => "empty".to_string(),
-            Language::Identifier(l1, l2) => l1.get_name(),
+            Language::Identifier(l1, l2) => l1.get_term(),
             Language::Function(a, n, s, t) => "function".to_string(),
             Language::FunctionArguments(v, t) => join_arguments(&v),
         }
@@ -48,7 +57,7 @@ impl Language {
             Language::Value(n, t) => t.clone(),
             Language::Call(n, t) => t.clone(),
             Language::Assignement(n, t) => t.clone(),
-            Language::Symbol(n, t) => t.clone(),
+            Language::Symbol(s) => s.get_type(),
             Language::Reserved(n, t) => t.clone(),
             Language::VectorArguments(v, t) => t.clone(),
             Language::ListArguments(v, t) => t.clone(),
@@ -73,28 +82,6 @@ impl Language {
         }
     }
 
-}
-
-// TODO solve problem with Vector of vector (can't be vec of vec)
-#[derive(PartialEq, Debug, Clone)]
-pub enum BaseType {
-    Logical,
-    Integer,
-    Double,
-    Character,
-    Complex,
-}
-
-#[derive(PartialEq, Debug, Clone)]
-pub enum Type {
-    Scalar(BaseType),
-    Vector(BaseType, Na),
-    List(Box<Type>),
-    Union(Box<Type>),
-    Function(Vec<Type>, Box<Type>),
-    Any,
-    Null,
-    Type
 }
 
 

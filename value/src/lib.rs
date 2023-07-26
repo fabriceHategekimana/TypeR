@@ -1,6 +1,6 @@
 use nom::branch::alt;
 use nom::IResult;
-use base_language::{Language};
+use base_language::Language;
 use logical::parse_logical;
 use integer::parse_integer;
 use double::parse_double;
@@ -22,7 +22,8 @@ pub fn parse_value(s: &str) -> IResult<&str, Language> {
 
 mod tests {
     use super::*;
-    use base_language::{Type, BaseType};
+    use base_language::r#type::{Type, BaseType};
+
 
     #[test]
     fn test_character() {

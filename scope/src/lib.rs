@@ -1,4 +1,5 @@
-use base_language::{Language, Type};
+use base_language::Language;
+use base_language::r#type::Type;
 use base_parser::{parse_open_bracket, parse_close_bracket};
 use nom::character::complete::line_ending;
 use nom::branch::alt;
@@ -35,7 +36,9 @@ pub fn parse_scope(s: &str) -> IResult<&str,Language> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use base_language::BaseType;
+    use base_language::r#type::BaseType;
+    use base_language::symbol::Symbol;
+    use base_language::type_name::TypeName;
 
     #[test]
     fn test_simple_scope(){
@@ -65,8 +68,8 @@ mod tests {
             Language::ScopeElements(vec![
                 Language::Assignement((
                         Box::new(Language::Identifier(
-                                Box::new(Language::Symbol("a".to_string(), Type::Any)), 
-                                Box::new(Language::Reserved("lgl".to_string(), Type::Type)), 
+                                Symbol::new("a"), 
+                                TypeName::new("lgl"), 
                                 )), 
                         Box::new(Language::Value("TRUE".to_string(), Type::Scalar(BaseType::Logical)))), Type::Null),
                 Language::Value("8".to_string(), Type::Scalar(BaseType::Integer)),

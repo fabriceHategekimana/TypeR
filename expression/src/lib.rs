@@ -5,6 +5,7 @@ use nom::branch::alt;
 use nom::IResult;
 use base_language::Language;
 
+
 pub fn parse_expression(s: &str) -> IResult<&str,Language> {
     alt((
             parse_value,
@@ -17,7 +18,7 @@ pub fn parse_expression(s: &str) -> IResult<&str,Language> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use base_language::{Type, BaseType};
+    use base_language::r#type::{Type, BaseType};
 
     #[test]
     fn test_expression_integer(){

@@ -5,7 +5,8 @@ use nom::branch::alt;
 use nom::sequence::preceded;
 use nom::multi::many1;
 use nom::combinator::opt; 
-use base_language::{Language, Type};
+use base_language::Language;
+use base_language::r#type::Type ;
 use value::parse_value;
 use vector::parse_vector;
 use base_parser::{parse_separator, parse_symbol};
@@ -48,7 +49,8 @@ pub fn parse_list(s: &str) -> IResult<&str,Language> {
 #[cfg(test)]
 mod tests {
     use super::parse_list;
-    use base_language::{Language, Type, BaseType};
+    use base_language::Language;
+    use base_language::r#type::{Type, BaseType};
 
     #[test]
     fn test1(){

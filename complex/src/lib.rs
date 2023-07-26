@@ -1,4 +1,5 @@
-use base_language::{Language, BaseType, Type};
+use base_language::Language;
+use base_language::r#type::{Type, BaseType};
 use nom::sequence::tuple;
 use nom::character::complete::digit1;
 use nom::combinator::opt;
@@ -42,7 +43,8 @@ pub fn parse_complex(s: &str) -> IResult<&str, Language> {
 
 #[cfg(test)]
 mod tests {
-    use base_language::{Language, BaseType, Type};
+    use base_language::Language;
+    use base_language::r#type::{Type, BaseType};
     use super::{parse_complex, parse_real};
 
     #[test]

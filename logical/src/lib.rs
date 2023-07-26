@@ -1,7 +1,8 @@
-use base_language::{Language, BaseType, Type};
+use base_language::Language;
 use nom::bytes::complete::tag;
 use nom::branch::alt;
 use nom::IResult;
+use base_language::r#type::{Type, BaseType};
 
 pub fn parse_logical(s: &str) -> IResult<&str, Language> {
     let res = alt((
@@ -16,10 +17,9 @@ pub fn parse_logical(s: &str) -> IResult<&str, Language> {
 
 #[cfg(test)]
 mod tests {
-    use base_language::{Language, BaseType, Type};
-    use super::{
-        parse_logical,
-    };
+    use base_language::Language;
+    use base_language::r#type::{Type, BaseType};
+    use super::parse_logical;
     use nom;
 
     #[test]

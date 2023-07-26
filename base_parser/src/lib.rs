@@ -2,8 +2,11 @@ use nom::branch::alt;
 use nom::IResult;
 use nom::bytes::complete::tag;
 use nom::character::complete::alphanumeric1;
-use base_language::{Language, Type};
 use nom::sequence::preceded;
+
+use base_language::Language;
+use base_language::r#type::Type;
+use base_language::symbol::Symbol;
 
 pub fn parse_open_parenthesis(s: &str) -> IResult<&str,&str> {
     alt((
@@ -170,7 +173,7 @@ pub fn parse_type(s: &str) -> IResult<&str,Language> {
 pub fn parse_symbol(s: &str) -> IResult<&str, Language> {
     let res = alphanumeric1(s);
     match res {
-        Ok((s, n)) => Ok((s, Language::Symbol(n.to_string(), Type::Any))),
+        Ok((s, n)) => Ok((s, Language::Symbol(Symbol::new(n)))),
         Err(r) => Err(r)
     }
 }
@@ -189,6 +192,7 @@ pub fn parse_type_annotation(s: &str) -> IResult<&str,Language> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use base_language::symbol::Symbol;
 
     #[test]
     fn test_type_annotation_with_colon(){
@@ -201,7 +205,7 @@ mod tests {
     fn test_type_annotation_with_arrow(){
         assert_eq!(
             parse_type_annotation(" -> DataFrame").unwrap().1,
-            Language::Symbol("DataFrame".to_string(), Type::Any));
+            Language::Symbol(Symbol::new("DataFrame")));
     }
 
 }

@@ -4,7 +4,8 @@ use nom::character::complete::digit1;
 use nom::bytes::complete::tag;
 use nom::branch::alt;
 use nom::IResult;
-use base_language::{Language, BaseType, Type};
+use base_language::Language;
+use base_language::r#type::{Type, BaseType};
 
 // TODO: Test digit L
 fn parse_digit_l(s: &str) -> IResult<&str, String> {
@@ -37,7 +38,8 @@ pub fn parse_integer(s: &str) -> IResult<&str, Language> {
 
 #[cfg(test)]
 mod tests {
-    use base_language::{Language, BaseType, Type};
+    use base_language::Language;
+    use base_language::r#type::{Type, BaseType};
     use super::{parse_integer, parse_digit_l, parse_digit_1};
 
     #[test]

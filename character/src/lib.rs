@@ -1,5 +1,6 @@
 use nom::IResult;
-use base_language::{Language, BaseType, Type};
+use base_language::Language;
+use base_language::r#type::{Type, BaseType};
 use nom::bytes::complete::{tag, take_until};
 use nom::sequence::tuple;
 
@@ -17,7 +18,8 @@ pub fn parse_character(s: &str) -> IResult<&str, Language> {
 
 #[cfg(test)]
 mod tests {
-    use base_language::{Language, BaseType, Type};
+    use base_language::Language;
+    use base_language::r#type::{Type, BaseType};
     use super::parse_character;
     use nom;
 

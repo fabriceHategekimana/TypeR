@@ -1,7 +1,8 @@
 use nom::bytes::complete::tag;
 use nom::sequence::{tuple, preceded};
 use nom::IResult;
-use base_language::{Language, Type};
+use base_language::Language;
+use base_language::r#type::Type;
 use nom::multi::many1;
 use base_parser::parse_symbol;
 use nom::branch::alt;
@@ -44,7 +45,7 @@ pub fn parse_vector(s: &str) -> IResult<&str, Language> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use base_language::BaseType;
+    use base_language::r#type::BaseType;
 
     #[test]
     fn test1(){
