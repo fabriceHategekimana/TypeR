@@ -4,10 +4,9 @@ use union::parse_union_type;
 use nom::IResult;
 use nom::sequence::tuple;
 use base_language::Language;
-use base_language::r#type::Type;
 use base_parser::{parse_type_annotation, parse_assignement_symbol, parse_symbol};
-use base_language::symbol::Symbol;
-use base_language::type_name::TypeName;
+use base_language::identifier::Identifier;
+use base_language::language_struct::LanguageStruct;
 
 pub fn parse_command(s: &str) -> IResult<&str,Language> {
     alt((
@@ -23,7 +22,7 @@ fn parse_identifier(s: &str) -> IResult<&str,Language> {
             parse_type_annotation
           ))(s);
     match res {
-        Ok((s, (i, t))) => Ok((s, Language::Identifier(Symbol::new(&i.get_name()), TypeName::new(&t.get_name())))),
+        Ok((s, (i, t))) => Ok((s, Language::Identifier(Identifier::new(&i.get_term(), &t.get_term())))),
         Err(r) => Err(r)
     }
 }
@@ -35,7 +34,8 @@ pub fn parse_assignment(s: &str) -> IResult<&str,Language> {
             parse_expression,
           ))(s);
     match res {
-        Ok((s, (i, _, v))) => Ok((s, Language::Assignement((Box::new(i), Box::new(v)), Type::Null))),
+        Ok((s, (Language::Identifier(sy), _, v))) => Ok((s, Language::Assignement(sy, Box::new(v)))),
+        Ok((_s, _)) => todo!(),
         Err(r) => Err(r)
     }
 }
@@ -45,21 +45,17 @@ pub fn parse_assignment(s: &str) -> IResult<&str,Language> {
 mod tests {
     use super::*;
     use base_language::r#type::BaseType;
+    use base_language::r#type::Type;
+    use base_language::value::Value;
 
     #[test]
     fn test_basic_type(){
         assert_eq!(
             parse_assignment("a: int <- 7").unwrap().1,
             Language::Assignement(
-                (
-                Box::new(
-                    Language::Identifier(
-                        Symbol::new("a"),
-                        TypeName::new("int"))), 
-                Box::new(
-                    Language::Value("7".to_string(), Type::Scalar(BaseType::Integer)))
-                ), Type::Null)
-            );
+                    Identifier::new("a", "int"),
+                    Box::new(Language::Value(Value::new("7", Type::Scalar(BaseType::Integer))))
+                    ));
     }
 
     #[test]
@@ -67,14 +63,8 @@ mod tests {
         assert_eq!(
             parse_assignment("a: Type <- 7").unwrap().1,
             Language::Assignement(
-                (
-                Box::new(
-                    Language::Identifier(
-                        Symbol::new("a"),
-                        TypeName::new("Type"))), 
-                Box::new(
-                    Language::Value("7".to_string(), Type::Scalar(BaseType::Integer)))
-                ), Type::Null)
+                        Identifier::new("a", "Type"),
+                        Box::new(Language::Value(Value::new("7", Type::Scalar(BaseType::Integer)))))
             );
     }
 
@@ -83,14 +73,8 @@ mod tests {
         assert_eq!(
             parse_assignment("a : Type = 7").unwrap().1,
             Language::Assignement(
-                (
-                Box::new(
-                    Language::Identifier(
-                        Symbol::new("a"),
-                        TypeName::new("Type"))), 
-                Box::new(
-                    Language::Value("7".to_string(), Type::Scalar(BaseType::Integer)))
-                ), Type::Null)
+                Identifier::new("a", "Type"),
+                Box::new(Language::Value(Value::new("7", Type::Scalar(BaseType::Integer)))))
             );
     }
 
@@ -99,17 +83,13 @@ mod tests {
         assert_eq!(
             parse_assignment("a : Type = c(1, 2)").unwrap().1,
             Language::Assignement(
-                (
-                Box::new(
-                    Language::Identifier(
-                        Symbol::new("a"),
-                        TypeName::new("Type"))), 
+                Identifier::new("a", "Type"),
                 Box::new(
                     Language::VectorArguments(vec![
-                                              Language::Value("1".to_string(), Type::Scalar(BaseType::Integer)),
-                                              Language::Value("2".to_string(), Type::Scalar(BaseType::Integer)),
-                    ], Type::Any))
-                ), Type::Null)
+                              Value::new("1", Type::Scalar(BaseType::Integer)),
+                              Value::new("2", Type::Scalar(BaseType::Integer)),
+                    ]))
+                )
             );
     }
 }

@@ -4,84 +4,75 @@ pub mod language_struct;
 pub mod symbol;
 pub mod type_name;
 pub mod r#type;
+pub mod identifier;
+pub mod value;
 
 use crate::language_struct::LanguageStruct;
 use crate::symbol::Symbol;
 use crate::type_name::TypeName;
+use crate::identifier::Identifier;
 use r#type::{Type, BaseType};
+use crate::value::Value;
 
 type Name = String;
 
 #[derive(PartialEq, Debug)]
 pub enum Language {
-    Value(Name, Type),
-    Call(Name, Type),
-    Assignement((Box<Language>, Box<Language>), Type),
-    Symbol(Symbol),
-    Identifier(Symbol, TypeName),
-    Reserved(Name, Type),
-    VectorArguments(Vec<Language>, Type),
-    ListArguments(Vec<Language>, Type),
-    ScopeElements(Vec<Language>, Type), // TODO: must only be symbol and reserved
-    UnionArguments(Vec<Language>, Type), // TODO: must only be symbol and reserved
-    Function(Box<Language>, TypeName, Box<Language>, Type),
-    FunctionArguments(Vec<Language>, Type),
+    Value(Value),
+    Symbol(Name), 
+    Reserved(Name), 
+    Identifier(Identifier), 
+    VectorArguments(Vec<Value>), 
+    UnionArguments(Vec<TypeName>), 
+    Assignement(Identifier, Box<Language>), // expression
+    ListArguments(Vec<Language>), //list of expression
+    ScopeElements(Vec<Language>), //list of command
+    Function(Vec<Identifier>, TypeName, Box<Language>), // list of Identifier; TypeName; list of
+                                                      // command
+    FunctionArguments(Vec<Identifier>), // list of Identifier
     Empty,
 }
 
-fn join_arguments(v: &Vec<Language>) -> String {
-    v.iter().map(|x| x.get_name()).collect::<Vec<String>>().join(",")
+fn join_arguments<L: LanguageStruct>(v: &Vec<L>) -> String {
+    v.iter().map(|x| x.get_term()).collect::<Vec<String>>().join(",")
 }
 
-impl Language {
-    pub fn get_name(&self) -> String {
+impl LanguageStruct for Language {
+    fn get_term(&self) -> String {
         match self {
-            Language::Value(n, t) => n.to_owned(),
-            Language::Call(n, t) => n.to_owned(),
-            Language::Assignement(n, t) => "Todo".to_string(),
-            Language::Symbol(s) => s.get_term(),
-            Language::Reserved(n, t) => n.to_owned(),
-            Language::VectorArguments(v, t) => join_arguments(&v),
-            Language::ListArguments(v, t) => join_arguments(&v),
-            Language::ScopeElements(v, t) => join_arguments(&v),
-            Language::UnionArguments(v, t) => join_arguments(&v),
+            Language::Value(v) => v.get_term(),
+            Language::Assignement(i, e) => "Todo".to_string(),
+            Language::Symbol(s) => s.to_string(),
+            Language::Reserved(n) => n.to_owned(),
+            Language::VectorArguments(v) => join_arguments(&v),
+            Language::ListArguments(v) => join_arguments(&v),
+            Language::ScopeElements(v) => join_arguments(&v),
+            Language::UnionArguments(v) => join_arguments(&v),
             Language::Empty => "empty".to_string(),
-            Language::Identifier(l1, l2) => l1.get_term(),
-            Language::Function(a, n, s, t) => "function".to_string(),
-            Language::FunctionArguments(v, t) => join_arguments(&v),
+            Language::Identifier(i) => i.get_term(),
+            Language::Function(a, n, s) => "function".to_string(),
+            Language::FunctionArguments(v) => join_arguments(&v),
         }
     }
+}
 
+impl Language { 
     fn get_type(&self) -> Type {
         match self {
-            Language::Value(n, t) => t.clone(),
-            Language::Call(n, t) => t.clone(),
-            Language::Assignement(n, t) => t.clone(),
-            Language::Symbol(s) => s.get_type(),
-            Language::Reserved(n, t) => t.clone(),
-            Language::VectorArguments(v, t) => t.clone(),
-            Language::ListArguments(v, t) => t.clone(),
-            Language::ScopeElements(v, t) => t.clone(),
-            Language::UnionArguments(v, t) => t.clone(),
+            Language::Value(v) => Type::Any,
+            Language::Assignement(i, e) => Type::Null,
+            Language::Symbol(s) => Type::Any,
+            Language::Reserved(n) => Type::Any,
+            Language::VectorArguments(v) => Type::Any,
+            Language::ListArguments(v) => Type::Any,
+            Language::ScopeElements(v) => Type::Any,
+            Language::UnionArguments(v) => Type::Any,
             Language::Empty => Type::Null,
-            Language::Identifier(l1, l2) => Type::Any,
-            Language::Function(a, n, s, t) => t.clone(),
-            Language::FunctionArguments(v, t) => t.clone(),
+            Language::Identifier(i) => Type::Any,
+            Language::Function(a, n, s) => Type::Any,
+            Language::FunctionArguments(v) => Type::Any,
         }
     }
-
-    // TODO find algorithm to infer the real type of the vector
-    fn infer_type_helper(v: &Vec<Language>) -> Type {
-        Type::Any
-    }
-
-    pub fn infer_type(&self) -> Type {
-        match self {
-            Language::VectorArguments(v, t) => Self::infer_type_helper(&v),
-            l => l.get_type()
-        }
-    }
-
 }
 
 
@@ -92,7 +83,7 @@ mod tests {
     #[test]
     fn test(){
         assert_eq!(
-            Language::Value("hey".to_string(), Type::Scalar(BaseType::Logical)).get_name(),
+            Language::Value(Value::new("hey", Type::Scalar(BaseType::Logical))).get_term(),
             "hey".to_string()
             );
     }

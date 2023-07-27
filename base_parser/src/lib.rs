@@ -5,8 +5,6 @@ use nom::character::complete::alphanumeric1;
 use nom::sequence::preceded;
 
 use base_language::Language;
-use base_language::r#type::Type;
-use base_language::symbol::Symbol;
 
 pub fn parse_open_parenthesis(s: &str) -> IResult<&str,&str> {
     alt((
@@ -165,7 +163,7 @@ pub fn parse_type(s: &str) -> IResult<&str,Language> {
             parse_normal_type,
         ))(s);
     match res {
-        Ok((s, r)) => Ok((s, Language::Reserved(r.to_string(), Type::Type))),
+        Ok((s, r)) => Ok((s, Language::Reserved(r.to_string()))),
         Err(r) => Err(r)
     }
 }
@@ -173,7 +171,7 @@ pub fn parse_type(s: &str) -> IResult<&str,Language> {
 pub fn parse_symbol(s: &str) -> IResult<&str, Language> {
     let res = alphanumeric1(s);
     match res {
-        Ok((s, n)) => Ok((s, Language::Symbol(Symbol::new(n)))),
+        Ok((s, n)) => Ok((s, Language::Symbol(n.to_string()))),
         Err(r) => Err(r)
     }
 }
@@ -192,20 +190,19 @@ pub fn parse_type_annotation(s: &str) -> IResult<&str,Language> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use base_language::symbol::Symbol;
 
     #[test]
     fn test_type_annotation_with_colon(){
         assert_eq!(
             parse_type_annotation(": int").unwrap().1,
-            Language::Reserved("int".to_string(), Type::Type));
+            Language::Reserved("int".to_string()));
     }
 
     #[test]
     fn test_type_annotation_with_arrow(){
         assert_eq!(
             parse_type_annotation(" -> DataFrame").unwrap().1,
-            Language::Symbol(Symbol::new("DataFrame")));
+            Language::Symbol("DataFrame".to_string()));
     }
 
 }

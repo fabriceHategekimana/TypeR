@@ -1,5 +1,4 @@
 use base_language::Language;
-use base_language::r#type::Type;
 use base_parser::{parse_open_bracket, parse_close_bracket};
 use nom::character::complete::line_ending;
 use nom::branch::alt;
@@ -28,7 +27,7 @@ pub fn parse_scope(s: &str) -> IResult<&str,Language> {
             parse_close_bracket
           ))(s);
     match res {
-        Ok((s, (_, e, _))) => Ok((s, Language::ScopeElements(e, Type::Any))),
+        Ok((s, (_, e, _))) => Ok((s, Language::ScopeElements(e))),
         Err(r) => Err(r)
     }
 }
@@ -37,16 +36,17 @@ pub fn parse_scope(s: &str) -> IResult<&str,Language> {
 mod tests {
     use super::*;
     use base_language::r#type::BaseType;
-    use base_language::symbol::Symbol;
-    use base_language::type_name::TypeName;
+    use base_language::identifier::Identifier;
+    use base_language::r#type::Type;
+    use base_language::value::Value;
 
     #[test]
     fn test_simple_scope(){
         assert_eq!(
             parse_scope("{ 12 }").unwrap().1,
             Language::ScopeElements(vec![
-                Language::Value("12".to_string(), Type::Scalar(BaseType::Integer))
-            ], Type::Any)
+                Language::Value(Value::new("12", Type::Scalar(BaseType::Integer)))
+            ])
                   );
     }
 
@@ -55,9 +55,9 @@ mod tests {
         assert_eq!(
             parse_scope("{ 5\n7 }").unwrap().1,
             Language::ScopeElements(vec![
-                Language::Value("5".to_string(), Type::Scalar(BaseType::Integer)),
-                Language::Value("7".to_string(), Type::Scalar(BaseType::Integer)),
-                        ], Type::Any)
+                Language::Value(Value::new("5", Type::Scalar(BaseType::Integer))),
+                Language::Value(Value::new("7", Type::Scalar(BaseType::Integer))),
+                        ])
                   );
     }
 
@@ -66,14 +66,11 @@ mod tests {
         assert_eq!(
             parse_scope("{ a: lgl = TRUE\n8 }").unwrap().1,
             Language::ScopeElements(vec![
-                Language::Assignement((
-                        Box::new(Language::Identifier(
-                                Symbol::new("a"), 
-                                TypeName::new("lgl"), 
-                                )), 
-                        Box::new(Language::Value("TRUE".to_string(), Type::Scalar(BaseType::Logical)))), Type::Null),
-                Language::Value("8".to_string(), Type::Scalar(BaseType::Integer)),
-                        ], Type::Any)
+                Language::Assignement(
+                    Identifier::new("a", "lgl"),
+                    Box::new(Language::Value(Value::new("TRUE", Type::Scalar(BaseType::Logical))))),
+                Language::Value(Value::new("8", Type::Scalar(BaseType::Integer)))
+                        ])
                   );
     }
 

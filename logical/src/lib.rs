@@ -3,6 +3,7 @@ use nom::bytes::complete::tag;
 use nom::branch::alt;
 use nom::IResult;
 use base_language::r#type::{Type, BaseType};
+use base_language::value::Value;
 
 pub fn parse_logical(s: &str) -> IResult<&str, Language> {
     let res = alt((
@@ -10,7 +11,7 @@ pub fn parse_logical(s: &str) -> IResult<&str, Language> {
         tag("FALSE"),
         ))(s);
     match res {
-        Ok((s, c)) => Ok((s, Language::Value(c.to_string(), Type::Scalar(BaseType::Logical)))),
+        Ok((s, c)) => Ok((s, Language::Value(Value::new(c, Type::Scalar(BaseType::Logical))))),
         Err(e) => Err(e)
     }
 }
@@ -19,6 +20,7 @@ pub fn parse_logical(s: &str) -> IResult<&str, Language> {
 mod tests {
     use base_language::Language;
     use base_language::r#type::{Type, BaseType};
+    use base_language::value::Value;
     use super::parse_logical;
     use nom;
 
@@ -26,11 +28,11 @@ mod tests {
     fn test_values(){
         assert_eq!(
             parse_logical("TRUE").unwrap().1,
-            Language::Value("TRUE".to_string(), Type::Scalar(BaseType::Logical))
+            Language::Value(Value::new("TRUE", Type::Scalar(BaseType::Logical)))
            ); 
         assert_eq!(
             parse_logical("FALSE").unwrap().1,
-            Language::Value("FALSE".to_string(), Type::Scalar(BaseType::Logical))
+            Language::Value(Value::new("FALSE", Type::Scalar(BaseType::Logical)))
            ); 
     }
 

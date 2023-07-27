@@ -2,20 +2,27 @@ use nom::bytes::complete::tag;
 use nom::sequence::{tuple, preceded};
 use nom::IResult;
 use base_language::Language;
-use base_language::r#type::Type;
 use nom::multi::many1;
 use base_parser::parse_symbol;
 use nom::branch::alt;
 use value::parse_value;
 use base_parser::parse_separator;
+use base_language::value::Value;
+use base_language::r#type::Type;
 
-fn parse_vector_argument(s: &str) ->  IResult<&str, Language> {
-    alt((
+fn parse_vector_argument(s: &str) ->  IResult<&str, Value> {
+    let res = alt((
         parse_value,
-        parse_symbol))(s)
+        parse_symbol))(s);
+    match res {
+        Ok((s, Language::Value(v))) => Ok((s, v)),
+        Ok((s, Language::Symbol(sy))) => Ok((s, Value::new(&sy, Type::Any))),
+        Ok((s, _)) => Ok((s, Value::new("NULL", Type::Null))),
+        Err(r) => Err(r)
+    }
 }
 
-fn parse_comma_vector_argument(s: &str) -> IResult<&str, Language> {
+fn parse_comma_vector_argument(s: &str) -> IResult<&str, Value> {
     preceded(parse_separator, parse_vector_argument)(s)
 }
 
@@ -25,7 +32,7 @@ fn parse_vector_arguments(s: &str) -> IResult<&str, Language> {
             parse_vector_argument
               )))(s);
     match res {
-        Ok((s, v)) => Ok((s, Language::VectorArguments(v, Type::Any))),
+        Ok((s, v)) => Ok((s, Language::VectorArguments(v))),
         Err(r) => Err(r)
     }
 }
@@ -46,17 +53,19 @@ pub fn parse_vector(s: &str) -> IResult<&str, Language> {
 mod tests {
     use super::*;
     use base_language::r#type::BaseType;
+    use base_language::r#type::Type;
+    use base_language::value::Value;
 
     #[test]
     fn test1(){
         assert_eq!(
             parse_vector("c(1, 2, 3, 4)").unwrap().1,
             Language::VectorArguments(vec![
-                        Language::Value("1".to_string(), Type::Scalar(BaseType::Integer)),
-                        Language::Value("2".to_string(), Type::Scalar(BaseType::Integer)),
-                        Language::Value("3".to_string(), Type::Scalar(BaseType::Integer)),
-                        Language::Value("4".to_string(), Type::Scalar(BaseType::Integer))
-            ], Type::Any)
+                        Value::new("1", Type::Scalar(BaseType::Integer)),
+                        Value::new("2", Type::Scalar(BaseType::Integer)),
+                        Value::new("3", Type::Scalar(BaseType::Integer)),
+                        Value::new("4", Type::Scalar(BaseType::Integer)),
+            ])
                   );
     }
 
@@ -65,10 +74,10 @@ mod tests {
         assert_eq!(
             parse_vector("c(\"char\", 2, FALSE)").unwrap().1,
             Language::VectorArguments(vec![
-                        Language::Value("\"char\"".to_string(), Type::Scalar(BaseType::Character)),
-                        Language::Value("2".to_string(), Type::Scalar(BaseType::Integer)),
-                        Language::Value("FALSE".to_string(), Type::Scalar(BaseType::Logical))
-            ], Type::Any)
+                        Value::new("\"char\"", Type::Scalar(BaseType::Character)),
+                        Value::new("2", Type::Scalar(BaseType::Integer)),
+                        Value::new("FALSE", Type::Scalar(BaseType::Logical))
+            ])
                   );
     }
 }

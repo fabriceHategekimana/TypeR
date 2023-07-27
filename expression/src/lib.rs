@@ -19,12 +19,13 @@ pub fn parse_expression(s: &str) -> IResult<&str,Language> {
 mod tests {
     use super::*;
     use base_language::r#type::{Type, BaseType};
+    use base_language::value::Value;
 
     #[test]
     fn test_expression_integer(){
         assert_eq!(
             parse_expression("-8L").unwrap().1,
-            Language::Value("-8L".to_string(), Type::Scalar(BaseType::Integer)));
+            Language::Value(Value::new("-8L", Type::Scalar(BaseType::Integer))));
     }
 
     #[test]
@@ -32,12 +33,11 @@ mod tests {
         assert_eq!(
             parse_expression("c(1, 2, 3, 4)").unwrap().1,
             Language::VectorArguments(vec![
-                        Language::Value("1".to_string(), Type::Scalar(BaseType::Integer)),
-                        Language::Value("2".to_string(), Type::Scalar(BaseType::Integer)),
-                        Language::Value("3".to_string(), Type::Scalar(BaseType::Integer)),
-                        Language::Value("4".to_string(), Type::Scalar(BaseType::Integer))
-            ], Type::Any)
-                  );
+                        Value::new("1", Type::Scalar(BaseType::Integer)),
+                        Value::new("2", Type::Scalar(BaseType::Integer)),
+                        Value::new("3", Type::Scalar(BaseType::Integer)),
+                        Value::new("4", Type::Scalar(BaseType::Integer))
+            ]));
     }
 
     #[test]
@@ -45,15 +45,15 @@ mod tests {
         assert_eq!(
             parse_expression("list(\"Red\", \"Green\", c(21,32,11), TRUE, 51.23)").unwrap().1,
             Language::ListArguments(vec![
-                Language::Value("\"Red\"".to_string(), Type::Scalar(BaseType::Character)),
-                Language::Value("\"Green\"".to_string(), Type::Scalar(BaseType::Character)),
+                Language::Value(Value::new("\"Red\"", Type::Scalar(BaseType::Character))),
+                Language::Value(Value::new("\"Green\"", Type::Scalar(BaseType::Character))),
                 Language::VectorArguments(vec![
-                                Language::Value("21".to_string(), Type::Scalar(BaseType::Integer)),
-                                Language::Value("32".to_string(), Type::Scalar(BaseType::Integer)),
-                                Language::Value("11".to_string(), Type::Scalar(BaseType::Integer))
-                                ], Type::Any),
-                Language::Value("TRUE".to_string(), Type::Scalar(BaseType::Logical)),
-                Language::Value("51.23".to_string(), Type::Scalar(BaseType::Double))
-            ], Type::Any));
+                                Value::new("21", Type::Scalar(BaseType::Integer)),
+                                Value::new("32", Type::Scalar(BaseType::Integer)),
+                                Value::new("11", Type::Scalar(BaseType::Integer))
+                                ]),
+                Language::Value(Value::new("TRUE", Type::Scalar(BaseType::Logical))),
+                Language::Value(Value::new("51.23", Type::Scalar(BaseType::Double)))
+            ]));
     }
 }

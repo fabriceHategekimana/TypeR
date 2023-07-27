@@ -1,19 +1,25 @@
 use base_language::Language;
-use base_language::r#type::Type;
 use base_parser::{parse_single_or, parse_symbol, parse_type};
 use nom::multi::many1;
 use nom::branch::alt;
 use nom::sequence::preceded;
 use nom::IResult;
+use base_language::type_name::TypeName;
 
-fn parse_symbol_or_type(s: &str) -> IResult<&str,Language> {
-    alt((
+fn parse_symbol_or_type(s: &str) -> IResult<&str,TypeName> {
+    let res = alt((
             parse_type,
             parse_symbol
-        ))(s)
+        ))(s);
+    match res {
+        Ok((s, Language::Symbol(sy))) => Ok((s, TypeName::new(&sy))),
+        Ok((s, Language::Reserved(n))) => Ok((s, TypeName::new(&n))),
+        Ok((s, _)) => Ok((s, TypeName::new("_"))),
+        Err(r) => Err(r)
+    }
 }
 
-fn parse_single_or_and_symbol_or_type(s: &str) -> IResult<&str,Language> {
+fn parse_single_or_and_symbol_or_type(s: &str) -> IResult<&str,TypeName> {
     preceded(parse_single_or, parse_symbol_or_type)(s)
 }
 
@@ -25,7 +31,7 @@ pub fn parse_union_type(s: &str) -> IResult<&str,Language> {
             ))
         )(s);
     match res {
-        Ok((s, v)) => Ok((s, Language::UnionArguments(v, Type::Type))),
+        Ok((s, v)) => Ok((s, Language::UnionArguments(v))),
         Err(r) => Err(r)
     }
 }
@@ -40,11 +46,9 @@ mod tests {
             parse_union_type("lgl | chr").unwrap().1,
             Language::UnionArguments(
                 vec![
-                    Language::Reserved("lgl".to_string(), Type::Type),
-                    Language::Reserved("chr".to_string(), Type::Type),
-                ]
-                , Type::Type)
-                  );
+                    TypeName::new("lgl"),
+                    TypeName::new("chr"),
+                ]));
     }
 
     #[test]
@@ -53,12 +57,10 @@ mod tests {
             parse_union_type("lgl | chr | clx").unwrap().1,
             Language::UnionArguments(
                 vec![
-                    Language::Reserved("lgl".to_string(), Type::Type),
-                    Language::Reserved("chr".to_string(), Type::Type),
-                    Language::Reserved("clx".to_string(), Type::Type),
-                ]
-                , Type::Type)
-                  );
+                    TypeName::new("lgl"),
+                    TypeName::new("chr"),
+                    TypeName::new("clx"),
+                ]));
     }
 
     #[test]
@@ -67,11 +69,9 @@ mod tests {
             parse_union_type("lgl[] | chr[]").unwrap().1,
             Language::UnionArguments(
                 vec![
-                    Language::Reserved("lgl[]".to_string(), Type::Type),
-                    Language::Reserved("chr[]".to_string(), Type::Type),
-                ]
-                , Type::Type)
-                  );
+                    TypeName::new("lgl[]"),
+                    TypeName::new("chr[]"),
+                ]));
     }
 
     #[test]
@@ -80,11 +80,9 @@ mod tests {
             parse_union_type("?lgl | ?chr[]").unwrap().1,
             Language::UnionArguments(
                 vec![
-                    Language::Reserved("?lgl".to_string(), Type::Type),
-                    Language::Reserved("?chr[]".to_string(), Type::Type),
-                ]
-                , Type::Type)
-                  );
+                    TypeName::new("?lgl"),
+                    TypeName::new("?chr[]"),
+                ]));
     }
 
 }

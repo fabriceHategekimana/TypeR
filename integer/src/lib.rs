@@ -6,6 +6,7 @@ use nom::branch::alt;
 use nom::IResult;
 use base_language::Language;
 use base_language::r#type::{Type, BaseType};
+use base_language::value::Value;
 
 // TODO: Test digit L
 fn parse_digit_l(s: &str) -> IResult<&str, String> {
@@ -30,8 +31,8 @@ pub fn parse_integer(s: &str) -> IResult<&str, Language> {
             tuple((opt(tag("-")), parse_digit_1))
         ))(s);
     match res {
-        Ok((s, (Some(m), v))) => Ok((s, Language::Value(format!("{}{}", m, v), Type::Scalar(BaseType::Integer)))),
-        Ok((s, (None, v))) => Ok((s, Language::Value(format!("{}", v), Type::Scalar(BaseType::Integer)))),
+        Ok((s, (Some(m), v))) => Ok((s, Language::Value(Value::new(&format!("{}{}", m, v), Type::Scalar(BaseType::Integer))))),
+        Ok((s, (None, v))) => Ok((s, Language::Value(Value::new(&format!("{}", v), Type::Scalar(BaseType::Integer))))),
         Err(e) => Err(e)
     }
 }
@@ -41,21 +42,22 @@ mod tests {
     use base_language::Language;
     use base_language::r#type::{Type, BaseType};
     use super::{parse_integer, parse_digit_l, parse_digit_1};
+    use base_language::value::Value;
 
     #[test]
     fn test_integer1() {
         assert_eq!(
             parse_integer("7").unwrap().1,
-            Language::Value("7".to_string(), Type::Scalar(BaseType::Integer)));
+            Language::Value(Value::new("7", Type::Scalar(BaseType::Integer))));
         assert_eq!(
             parse_integer("3L").unwrap().1,
-            Language::Value("3L".to_string(), Type::Scalar(BaseType::Integer)));
+            Language::Value(Value::new("3L", Type::Scalar(BaseType::Integer))));
         assert_eq!(
             parse_integer("-8").unwrap().1,
-            Language::Value("-8".to_string(), Type::Scalar(BaseType::Integer)));
+            Language::Value(Value::new("-8", Type::Scalar(BaseType::Integer))));
         assert_eq!(
             parse_integer("-8L").unwrap().1,
-            Language::Value("-8L".to_string(), Type::Scalar(BaseType::Integer)));
+            Language::Value(Value::new("-8L", Type::Scalar(BaseType::Integer))));
     }
 
     #[test]
