@@ -8,7 +8,6 @@ members = [
 	"character",
 	"complex",
 	"value",
-	"checker",
 	"list",
 	"base_parser",
 	"function",
@@ -17,4 +16,5 @@ members = [
 	"expression",
 	"scope",
 	"command",
+	"checker",
 ]

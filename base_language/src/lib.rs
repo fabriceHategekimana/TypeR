@@ -18,10 +18,10 @@ type Name = String;
 
 #[derive(PartialEq, Debug)]
 pub enum Language {
-    Value(Value),
     Symbol(Name), 
     Reserved(Name), 
     Identifier(Identifier), 
+    Value(Value),
     VectorArguments(Vec<Value>), 
     UnionArguments(Vec<TypeName>), 
     Assignement(Identifier, Box<Language>), // expression
@@ -40,7 +40,6 @@ fn join_arguments<L: LanguageStruct>(v: &Vec<L>) -> String {
 impl LanguageStruct for Language {
     fn get_term(&self) -> String {
         match self {
-            Language::Value(v) => v.get_term(),
             Language::Assignement(i, e) => "Todo".to_string(),
             Language::Symbol(s) => s.to_string(),
             Language::Reserved(n) => n.to_owned(),
@@ -52,14 +51,12 @@ impl LanguageStruct for Language {
             Language::Identifier(i) => i.get_term(),
             Language::Function(a, n, s) => "function".to_string(),
             Language::FunctionArguments(v) => join_arguments(&v),
+            _ => "(not implemented yet)".to_string()
         }
     }
-}
 
-impl Language { 
     fn get_type(&self) -> Type {
         match self {
-            Language::Value(v) => Type::Any,
             Language::Assignement(i, e) => Type::Null,
             Language::Symbol(s) => Type::Any,
             Language::Reserved(n) => Type::Any,
@@ -71,6 +68,7 @@ impl Language {
             Language::Identifier(i) => Type::Any,
             Language::Function(a, n, s) => Type::Any,
             Language::FunctionArguments(v) => Type::Any,
+            _ => Type::Any
         }
     }
 }
@@ -83,7 +81,7 @@ mod tests {
     #[test]
     fn test(){
         assert_eq!(
-            Language::Value(Value::new("hey", Type::Scalar(BaseType::Logical))).get_term(),
+            Value::new("hey", Type::Scalar(BaseType::Logical)).get_term(),
             "hey".to_string()
             );
     }

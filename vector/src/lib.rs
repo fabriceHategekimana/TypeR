@@ -1,25 +1,28 @@
-use nom::bytes::complete::tag;
-use nom::sequence::{tuple, preceded};
 use nom::IResult;
-use base_language::Language;
-use nom::multi::many1;
-use base_parser::parse_symbol;
 use nom::branch::alt;
+use nom::multi::many1;
 use value::parse_value;
-use base_parser::parse_separator;
+use base_language::Language;
+use nom::bytes::complete::tag;
+use base_parser::parse_symbol;
 use base_language::value::Value;
 use base_language::r#type::Type;
+use base_parser::parse_separator;
+use nom::sequence::{tuple, preceded};
+
+fn parse_symbol_to_value(s: &str) -> IResult<&str, Value> {
+   let res = parse_symbol(s);
+   match res {
+       Ok((s, Language::Symbol(sy))) => Ok((s, Value::new(&sy, Type::Any))),
+       Ok((s, _)) => Ok((s, Value::new("NULL", Type::Null))),
+       Err(r) => Err(r)
+   }
+}
 
 fn parse_vector_argument(s: &str) ->  IResult<&str, Value> {
-    let res = alt((
+    alt((
         parse_value,
-        parse_symbol))(s);
-    match res {
-        Ok((s, Language::Value(v))) => Ok((s, v)),
-        Ok((s, Language::Symbol(sy))) => Ok((s, Value::new(&sy, Type::Any))),
-        Ok((s, _)) => Ok((s, Value::new("NULL", Type::Null))),
-        Err(r) => Err(r)
-    }
+        parse_symbol_to_value))(s)
 }
 
 fn parse_comma_vector_argument(s: &str) -> IResult<&str, Value> {

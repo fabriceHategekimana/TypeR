@@ -4,7 +4,6 @@ use nom::character::complete::digit1;
 use nom::bytes::complete::tag;
 use nom::branch::alt;
 use nom::IResult;
-use base_language::Language;
 use base_language::r#type::{Type, BaseType};
 use base_language::value::Value;
 
@@ -25,21 +24,20 @@ fn parse_digit_1(s: &str) ->IResult<&str, String> {
     }
 }
 
-pub fn parse_integer(s: &str) -> IResult<&str, Language> {
+pub fn parse_integer(s: &str) -> IResult<&str, Value> {
     let res = alt((
             tuple((opt(tag("-")), parse_digit_l)),
             tuple((opt(tag("-")), parse_digit_1))
         ))(s);
     match res {
-        Ok((s, (Some(m), v))) => Ok((s, Language::Value(Value::new(&format!("{}{}", m, v), Type::Scalar(BaseType::Integer))))),
-        Ok((s, (None, v))) => Ok((s, Language::Value(Value::new(&format!("{}", v), Type::Scalar(BaseType::Integer))))),
+        Ok((s, (Some(m), v))) => Ok((s, Value::new(&format!("{}{}", m, v), Type::Scalar(BaseType::Integer)))),
+        Ok((s, (None, v))) => Ok((s, Value::new(&format!("{}", v), Type::Scalar(BaseType::Integer)))),
         Err(e) => Err(e)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use base_language::Language;
     use base_language::r#type::{Type, BaseType};
     use super::{parse_integer, parse_digit_l, parse_digit_1};
     use base_language::value::Value;
@@ -48,16 +46,16 @@ mod tests {
     fn test_integer1() {
         assert_eq!(
             parse_integer("7").unwrap().1,
-            Language::Value(Value::new("7", Type::Scalar(BaseType::Integer))));
+            Value::new("7", Type::Scalar(BaseType::Integer)));
         assert_eq!(
             parse_integer("3L").unwrap().1,
-            Language::Value(Value::new("3L", Type::Scalar(BaseType::Integer))));
+            Value::new("3L", Type::Scalar(BaseType::Integer)));
         assert_eq!(
             parse_integer("-8").unwrap().1,
-            Language::Value(Value::new("-8", Type::Scalar(BaseType::Integer))));
+            Value::new("-8", Type::Scalar(BaseType::Integer)));
         assert_eq!(
             parse_integer("-8L").unwrap().1,
-            Language::Value(Value::new("-8L", Type::Scalar(BaseType::Integer))));
+            Value::new("-8L", Type::Scalar(BaseType::Integer)));
     }
 
     #[test]

@@ -25,6 +25,10 @@ dependencies = [
 [[package]]
 name = "checker"
 version = "0.1.0"
+dependencies = [
+ "base_language",
+ "command",
+]
 
 [[package]]
 name = "command"

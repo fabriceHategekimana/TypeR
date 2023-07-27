@@ -1,4 +1,3 @@
-use base_language::Language;
 use base_language::r#type::{Type, BaseType};
 use base_language::value::Value;
 use nom::sequence::tuple;
@@ -30,13 +29,13 @@ pub fn parse_real(s: &str) -> IResult<&str, String> {
     }
 }
 
-pub fn parse_complex(s: &str) -> IResult<&str, Language> {
+pub fn parse_complex(s: &str) -> IResult<&str, Value> {
     let res = tuple((
                parse_real,
                tag("i")
                   ))(s);
     match res {
-        Ok((s, (v, i))) => Ok((s, Language::Value(Value::new(&format!("{}{}", v, i), Type::Scalar(BaseType::Complex))))),
+        Ok((s, (v, i))) => Ok((s, Value::new(&format!("{}{}", v, i), Type::Scalar(BaseType::Complex)))),
         Err(e) => Err(e)
     }
 }
@@ -44,7 +43,6 @@ pub fn parse_complex(s: &str) -> IResult<&str, Language> {
 
 #[cfg(test)]
 mod tests {
-    use base_language::Language;
     use base_language::r#type::{Type, BaseType};
     use super::{parse_complex, parse_real};
     use base_language::value::Value;
@@ -53,14 +51,14 @@ mod tests {
     fn test_complex_1() {
         assert_eq!(
             parse_complex("3i").unwrap().1,
-            Language::Value(Value::new("3i", Type::Scalar(BaseType::Complex))));
+            Value::new("3i", Type::Scalar(BaseType::Complex)));
     }
 
     #[test]
     fn test_complex_2() {
         assert_eq!(
             parse_complex("251i").unwrap().1,
-            Language::Value(Value::new("251i", Type::Scalar(BaseType::Complex))));
+            Value::new("251i", Type::Scalar(BaseType::Complex)));
     }
     
     #[test]

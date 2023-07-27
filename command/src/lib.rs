@@ -74,7 +74,9 @@ mod tests {
             parse_assignment("a : Type = 7").unwrap().1,
             Language::Assignement(
                 Identifier::new("a", "Type"),
-                Box::new(Language::Value(Value::new("7", Type::Scalar(BaseType::Integer)))))
+                Box::new(
+                    Language::Value(Value::new("7", Type::Scalar(BaseType::Integer)))
+                    ))
             );
     }
 
@@ -92,4 +94,17 @@ mod tests {
                 )
             );
     }
+
+    #[test]
+    fn test_simple_vector() {
+        assert_eq!(
+            parse_command("c(1, 2, 3)").unwrap().1,
+            Language::VectorArguments(vec![
+                    Value::new("1", Type::Scalar(BaseType::Integer)),
+                    Value::new("2", Type::Scalar(BaseType::Integer)),
+                    Value::new("3", Type::Scalar(BaseType::Integer)),
+                  ])
+            );
+    }
+
 }

@@ -1,4 +1,4 @@
-use value::parse_value;
+use value::parse_value_to_language;
 use vector::parse_vector;
 use list::parse_list;
 use nom::branch::alt;
@@ -8,7 +8,7 @@ use base_language::Language;
 
 pub fn parse_expression(s: &str) -> IResult<&str,Language> {
     alt((
-            parse_value,
+            parse_value_to_language,
             parse_vector,
             parse_list,
         ))(s)

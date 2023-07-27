@@ -6,15 +6,16 @@ use nom::sequence::preceded;
 use nom::multi::many1;
 use nom::combinator::opt; 
 use base_language::Language;
-use value::parse_value;
+use value::parse_value_to_language;
 use vector::parse_vector;
 use base_parser::{parse_separator, parse_symbol};
 
+
 fn parse_list_parameter(s: &str) -> IResult<&str,Language> {
     alt((
-            parse_value,
-            parse_vector,
             parse_list,
+            parse_vector,
+            parse_value_to_language,
             parse_symbol,
         ))(s)
 }
