@@ -1,6 +1,6 @@
 use crate::LanguageStruct;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Symbol {
     term: String,
 }

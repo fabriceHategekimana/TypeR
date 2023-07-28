@@ -34,13 +34,43 @@ fn to_union_type(v: impl LanguageStruct) -> Vec<NormalDisjunctiveForm> {
     todo!();
 }
 
+type Ndf = (String, Result<NormalDisjunctiveForm, (Type, Type)>);
+
+trait NdfWrapper {
+    fn new(v: &Value) -> Ndf;
+    fn default() -> Ndf;
+    fn get_englobing_ndf(&self, ndf: Ndf) -> Ndf;
+}
+
+impl NdfWrapper for Ndf {
+    fn new(v: &Value) -> Ndf {
+        (v.get_term(),
+        Ok(NormalDisjunctiveForm::from_type(v.get_type())))
+    }
+
+    fn get_englobing_ndf(&self, ndf: Ndf) -> Ndf {
+        match &self.1 {
+            Ok(s) => (self.0.clone(), s.get_englobing_ndf(ndf.1)),
+            Err(e) => self.clone()
+        }
+    }
+
+    fn default() -> Ndf {
+        ("".to_string(), Ok(NormalDisjunctiveForm::default()))
+    }
+}
+
+
 fn unify_vector_arguments(v: Vec<Value>) -> (Checker, TypeInfo) {
     //develop -> (term, Vec<NormalDisjunctiveForm>)
-    //fold get_englobing type -> Result<NormalDisjunctiveForm, Err((T1, T2))> with Ok(Bottom)
-    //match
-    //Ok(v) => (Checker::Correct, TypeInfo::Type(to_type(v)))
-    //Err((t1, t2)) => (Checker::Mismatch(t1, t2))
-    return_error()
+    let res = v.iter().map(|x| Ndf::new(x))
+        .fold(Ndf::default(), |acc, x| x.get_englobing_ndf(acc));
+   match res {
+       (s, Ok(ndf))  => (Checker::Correct, TypeInfo::Type(ndf.get_type())),
+       (s, Err((t1, t2))) => {
+                        println!("{}", format!("Error: Mismatched types {:?} and {:?}", t1, t2));
+                        (Checker::Error, TypeInfo::Empty)}
+   } 
 }
 
 fn return_error() -> (Checker, TypeInfo) {
@@ -104,21 +134,46 @@ mod tests {
     }
 
     #[test]
-    fn test_vector_argument() {
-        assert_eq!(
-            parse_command("c(1,2)").unwrap().1,
-            Language::VectorArguments(vec![
-                Value::new("1", Type::from("int")),
-                Value::new("2", Type::from("int"))
-            ])
-                  );
-    }
-
-    #[test]
     fn test_check_vector() {
         assert_eq!(
             parse_and_check("c(1,2)"),
            (Checker::Correct, TypeInfo::Type(Type::from("int"))));
+    }
+    #[test]
+    fn test_vector_good_coertion() {
+        assert_eq!(
+            parse_command("c(1,2.0)").unwrap().1,
+            Language::VectorArguments(vec![
+                Value::new("1", Type::from("int")),
+                Value::new("2.0", Type::from("dbl")),
+            ]));
+    }
+
+    #[test]
+    fn test_check_vector_good_type_coertion1() {
+        assert_eq!(
+            parse_and_check("c(1,2.0)"),
+           (Checker::Correct, TypeInfo::Type(Type::from("dbl"))));
+    }
+
+    #[test]
+    fn test_check_vector_good_type_coertion2() {
+        assert_eq!(
+            parse_and_check("c(1,2.0,4i)"),
+           (Checker::Correct, TypeInfo::Type(Type::from("clx"))));
+    }
+    #[test]
+    fn test_check_vector_bad_type_coertion() {
+        assert_eq!(
+            parse_and_check("c(1,2.0,\"hey\")"),
+           (Checker::Error, TypeInfo::Empty));
+    }
+
+    #[test]
+    fn test_identifier() {
+        assert_eq!(
+            parse_command("a : int").unwrap().1,
+            Language::Identifier(Identifier::new("a", "int")));
     }
 
 }

@@ -14,16 +14,23 @@ pub struct NormalDisjunctiveForm {
     remaining_type: Vec<Type>
 }
 
-trait NDF {
+pub trait NDF {
     fn new(root: Vec<UnionRoot>, disjunction: Vec<Disjunction>) -> Self;
-    fn from(t: Type) -> Self;
+    fn default() -> Self;
+    fn from_type(t: Type) -> Self;
     fn set_type(&self, t: Type) -> Self;
     fn to_vector(&self) -> Self;
     fn add_na(&self, na: bool) -> Self;
     fn scalar_to_ndf(t: BaseType) -> Self;
     fn vector_to_ndf(t: BaseType, na: bool) -> Self ;
     fn list_to_ndf(t: Vec<Type>) -> Self;
+    fn union_to_ndf(t: Vec<Type>) -> Self;
+    fn function_to_ndf(args: Vec<Type>, ret: Box<Type>) -> Self;
+    fn type_to_ndf(t: &str) -> Self;
     fn combine(&self, ndf: NormalDisjunctiveForm) -> Self;
+    fn get_englobing_ndf(&self, ndf: Result<NormalDisjunctiveForm, (Type, Type)>) -> Result<Self, (Type, Type)> where Self: Sized;
+    fn get_type(&self) -> Type;
+}
 
 impl NDF for NormalDisjunctiveForm {
 
@@ -35,6 +42,14 @@ impl NDF for NormalDisjunctiveForm {
         }
     }
 
+    fn default() -> NormalDisjunctiveForm {
+        NormalDisjunctiveForm { root: vec![], disjunctions: vec![], remaining_type: vec![] }
+    }
+
+    fn get_type(&self) -> Type {
+        self.remaining_type[0].clone()
+    }
+
     fn set_type(&self, t: Type) -> NormalDisjunctiveForm {
         NormalDisjunctiveForm { 
             root: self.root.clone(),
@@ -43,18 +58,34 @@ impl NDF for NormalDisjunctiveForm {
         }
     }
 
-    fn from(t: Type) -> NormalDisjunctiveForm {
+    fn from_type(t: Type) -> NormalDisjunctiveForm {
        match t {
-           Type::Scalar(s) => Self::scalar_to_ndf(s),
-           Type::Vector(v, na) => Self::vector_to_ndf(v, na),
-           Type::List(t) => Self::list_to_ndf(t),
-           Type::Union(u) =>Self::union_to_ndf(t),
+           Type::Scalar(s) => Self::scalar_to_ndf(s.clone()).set_type(Type::Scalar(s.clone())),
+           Type::Vector(v, na) => Self::vector_to_ndf(v.clone(), na.clone()).set_type(Type::Vector(v.clone(), na.clone())),
+           Type::List(vt) => Self::list_to_ndf(vt.clone()).set_type(Type::List(vt.clone())),
+           Type::Union(vt) =>Self::union_to_ndf(vt.clone()).set_type(Type::Union(vt.clone())),
+           Type::Function(args, ret) => Self::function_to_ndf(args.clone(), ret.clone()).set_type(Type::Function(args.clone(), ret.clone())),
+           Type::Any =>  Self::default().set_type(Type::Any),
+           Type::Null => Self::default().set_type(Type::Null),
+           Type::Type(s) => Self::type_to_ndf(&s).set_type(Type::Type(s.clone()))
        } 
     }
 
-    fn union_to_ndf(tn: Vec<Type>) -> NormalDisjunctiveForm {
-       tn.iter()
-           .map(|t| NormalDisjunctiveForm::from(t))
+    fn type_to_ndf(_s: &str) -> NormalDisjunctiveForm {
+        NormalDisjunctiveForm { root: vec![], disjunctions: vec![], remaining_type: vec![Type::Any] }
+    }
+
+    fn function_to_ndf(args: Vec<Type>, ret: Box<Type>) -> NormalDisjunctiveForm {
+        NormalDisjunctiveForm {
+           root: vec![UnionRoot::Function],
+           disjunctions: vec![],
+           remaining_type: combine_vec(args, vec![*ret]),
+        }
+    }
+
+    fn union_to_ndf(t: Vec<Type>) -> NormalDisjunctiveForm {
+       t.iter()
+           .map(|t| <NormalDisjunctiveForm as NDF>::from_type(t.clone()))
            .fold(
                NormalDisjunctiveForm::default(),
                |acc, x| acc.combine(x))
@@ -62,10 +93,17 @@ impl NDF for NormalDisjunctiveForm {
 
     fn combine(&self, ndf: NormalDisjunctiveForm) -> NormalDisjunctiveForm {
        NormalDisjunctiveForm { 
-           root: combine(self.root, ndf.root),
-           disjunctions: combine_vec(self.disjunctions, ndf.disjunctions),
+           root: combine_vec(self.root.clone(), ndf.root),
+           disjunctions: combine_vec(self.disjunctions.clone(), ndf.disjunctions),
            remaining_type: vec![Type::Any]
        } 
+    }
+
+    fn get_englobing_ndf(&self, ndf: Result<NormalDisjunctiveForm, (Type, Type)>) -> Result<NormalDisjunctiveForm, (Type, Type)> {
+        match ndf {
+            Ok(ndf) => get_englobing_ndf_helper(self.clone(), ndf),
+            Err(e) => Err(e)
+        }
     }
 
     fn list_to_ndf(t: Vec<Type>) -> NormalDisjunctiveForm {
@@ -82,8 +120,8 @@ impl NDF for NormalDisjunctiveForm {
 
     fn to_vector(&self) -> NormalDisjunctiveForm {
         NormalDisjunctiveForm { 
-            root: vec![UnionRoot::Vector],
-            disjunctions: self.disjunctions.clone(),
+            root: self.root.clone(),
+            disjunctions: combine_vec(self.disjunctions.clone(), vec![Disjunction::Vector]),
             remaining_type: self.remaining_type.clone()
         }
     }
@@ -130,8 +168,30 @@ impl NDF for NormalDisjunctiveForm {
     }
 }
 
+fn get_englobing_ndf_helper(ndf1: NormalDisjunctiveForm, ndf2: NormalDisjunctiveForm) -> Result<NormalDisjunctiveForm, (Type, Type)> {
+    match is_there_an_inclusion(&ndf1.root, &ndf2.root){
+        true => return_englobing_ndf(ndf1, ndf2),
+        false => Err((ndf1.remaining_type[0].clone(), ndf2.remaining_type[0].clone()))
+    }
+}
+
+fn return_englobing_ndf(ndf1: NormalDisjunctiveForm, ndf2: NormalDisjunctiveForm) -> Result<NormalDisjunctiveForm, (Type, Type)> {
+    let mut group = vec![ndf1.clone(), ndf2.clone()];
+    group.sort_by(|x, y| x.disjunctions.len().partial_cmp(&y.disjunctions.len()).unwrap());
+    match group[0].disjunctions.iter().all(|x| group[1].disjunctions.iter().any(|y| y == x)) {
+        true => Ok(group[1].clone()),
+        _ => Err((ndf1.remaining_type[0].clone(), ndf2.remaining_type[0].clone()))
+    }
+}
+
+fn is_there_an_inclusion<T: PartialEq>(v1: &Vec<T>, v2: &Vec<T>) -> bool {
+    let mut group = vec![v1, v2];
+    group.sort_by(|x, y| x.len().partial_cmp(&y.len()).unwrap());
+    group[0].iter().all(|x| group[1].iter().any(|y| y == x)) 
+}
+
 fn combine_vec<T: Eq + Clone>(v1: Vec<T>, v2: Vec<T>) -> Vec<T> {
-   let s: Vec<T> = vec![];
+   let mut s: Vec<T> = vec![];
    for e in v1.iter().chain(v2.iter()) {
        if !s.iter().any(|x| x == e) {
             s.push(e.clone()) 
@@ -150,13 +210,16 @@ pub enum Disjunction {
    Raw,
    Null,
    Na,
+   Vector,
 }
 
 #[derive(Eq, PartialEq, Debug, Clone)]
 pub enum UnionRoot {
    Number,
-   Vector,
    Char,
    Raw,
    List,
+   Function,
 }
+
+

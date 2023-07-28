@@ -16,7 +16,7 @@ use crate::value::Value;
 
 type Name = String;
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub enum Language {
     Symbol(Name), 
     Reserved(Name), 

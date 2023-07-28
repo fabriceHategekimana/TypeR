@@ -10,11 +10,10 @@ members = [
 	"value",
 	"list",
 	"base_parser",
-	"function",
 	"union",
 	"vector",
 	"expression",
-	"scope",
 	"command",
 	"checker",
+	"transpiler",
 ]

@@ -2,7 +2,7 @@ use crate::Language;
 use crate::Type;
 use crate::LanguageStruct;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Value {
     name: String,
     infered_type: Type

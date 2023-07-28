@@ -69,16 +69,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "function"
-version = "0.1.0"
-dependencies = [
- "base_language",
- "base_parser",
- "nom",
- "scope",
-]
-
-[[package]]
 name = "integer"
 version = "0.1.0"
 dependencies = [
@@ -132,14 +122,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "scope"
+name = "transpiler"
 version = "0.1.0"
 dependencies = [
  "base_language",
- "base_parser",
+ "checker",
  "command",
- "expression",
- "nom",
 ]
 
 [[package]]

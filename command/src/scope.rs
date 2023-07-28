@@ -1,12 +1,12 @@
-use base_language::Language;
-use base_parser::{parse_open_bracket, parse_close_bracket};
 use nom::character::complete::line_ending;
 use nom::branch::alt;
 use nom::IResult;
 use nom::sequence::preceded;
 use nom::multi::many1;
 use nom::sequence::tuple;
-use command::parse_command;
+use base_language::Language;
+use base_parser::{parse_open_bracket, parse_close_bracket};
+use crate::parse_command;
 
 
 fn parse_new_line_and_command(s: &str) -> IResult<&str,Language> {

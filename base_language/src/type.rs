@@ -1,7 +1,7 @@
 pub type Na = bool;
 
 // TODO solve problem with Vector of vector (can't be vec of vec)
-#[derive(PartialEq, Debug, Clone)]
+#[derive(Eq, PartialEq, Debug, Clone)]
 pub enum BaseType {
     Logical,
     Integer,
@@ -11,7 +11,7 @@ pub enum BaseType {
     Raw,
 }
 
-#[derive(PartialEq, Debug, Clone)]
+#[derive(Eq, PartialEq, Debug, Clone)]
 pub enum Type {
     Scalar(BaseType),
     Vector(BaseType, Na),
@@ -20,13 +20,18 @@ pub enum Type {
     Function(Vec<Type>, Box<Type>),
     Any,
     Null,
-    Type
+    Type(String)
 }
 
 impl Type {
     pub fn from(s: &str) -> Type {
         match s {
             "int" => Type::Scalar(BaseType::Integer),
+            "dbl" => Type::Scalar(BaseType::Double),
+            "lgl" => Type::Scalar(BaseType::Logical),
+            "chr" => Type::Scalar(BaseType::Character),
+            "clx" => Type::Scalar(BaseType::Complex),
+            "raw" => Type::Scalar(BaseType::Raw),
             _ => Type::Any
         }
     }

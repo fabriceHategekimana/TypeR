@@ -1,3 +1,6 @@
+pub mod function;
+pub mod scope;
+
 use expression::parse_expression;
 use nom::branch::alt;
 use union::parse_union_type;
@@ -7,11 +10,16 @@ use base_language::Language;
 use base_parser::{parse_type_annotation, parse_assignement_symbol, parse_symbol};
 use base_language::identifier::Identifier;
 use base_language::language_struct::LanguageStruct;
+use scope::parse_scope;
+use function::parse_function;
 
 pub fn parse_command(s: &str) -> IResult<&str,Language> {
     alt((
             parse_expression,
             parse_assignment,
+            parse_identifier,
+            parse_function,
+            parse_scope,
             parse_union_type,
         ))(s)
 }
@@ -105,6 +113,13 @@ mod tests {
                     Value::new("3", Type::Scalar(BaseType::Integer)),
                   ])
             );
+    }
+
+    #[test]
+    fn test_identifier() {
+        assert_eq!(
+            parse_command("a : int").unwrap().1,
+            Language::Identifier(Identifier::new("a", "int")));
     }
 
 }
