@@ -2,6 +2,7 @@
 // The goal is to do a type inference of types and spot incoherences
 
 mod normal_disjunctive_form;
+mod context;
 
 use base_language::Language;
 use base_language::r#type::Type;
