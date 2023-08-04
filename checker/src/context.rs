@@ -13,9 +13,8 @@ enum Origin {
 impl Origin {
     fn get_string(&self) -> String {
         match self {
-            Origin::BaseType(s) => s.to_string(),
-            Origin::From(s) => s,
-            _ => "Unknown".to_string()
+            Origin::BaseType(s) => s.get_string(),
+            Origin::From(s) => s.to_string(),
         }
     }
 }
@@ -67,7 +66,7 @@ impl Context {
     }
 
     fn is_a_type(&self, s: &str) -> bool {
-        self.alias.iter().any(|(typ, var)| typ == s || var == s)
+        self.alias.iter().any(|(typ, var)| typ == s || var.get_string() == s)
     }
 
 }
