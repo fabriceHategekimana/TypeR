@@ -24,6 +24,13 @@ struct Context {
     variables: Vec<(String, String)> 
 }
 
+#[derive(PartialEq, Debug, Copy)]
+enum Identity {
+    Variable,
+    Type,
+    None,
+}
+
 impl Context {
     fn new() -> Context {
         Context {
@@ -52,13 +59,21 @@ impl Context {
     }
 
     fn get_type_of(&self, s: &str) -> Result<Type, String> {
-        // si c'est une variable définie
-        // extraire sont type
-        // retourner le type racine
-        // si c'est un type
-        // retourner le type racine
-        // sinon dire que ce n'est pas un type valide
-        todo!();
+        match self.identify(s) {
+            Identity::Variable => Ok(self.get_variable_type(s)),
+            Identity::Type => Ok(self.get_type_base_type(s)),
+            Identity::None => Err(format!("'{}' is not a valide symbol", s)),
+        }
+    }
+    
+    fn identify(&self, s: &str) -> Identity {
+        if self.is_a_variable(s) {
+            return Identity::Variable;
+        } else if self.is_a_type(s) {
+            return Identity::Type;
+        } else {
+            return Identity::None;
+        }
     }
 
     fn is_a_variable(&self, s: &str) -> bool {
@@ -67,6 +82,14 @@ impl Context {
 
     fn is_a_type(&self, s: &str) -> bool {
         self.alias.iter().any(|(typ, var)| typ == s || var.get_string() == s)
+    }
+
+    fn get_variable_type(&self, s: &str) -> Type {
+        todo!();
+    }
+
+    fn get_type_base_type(&self) -> Type {
+        todo!();
     }
 
 }
