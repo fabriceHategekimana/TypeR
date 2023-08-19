@@ -33,6 +33,7 @@ pub enum Type {
     Function(Vec<Type>, Box<Type>),
     Any,
     Null,
+    Nullable(Box<Type>),
     Type(String)
 }
 
@@ -71,6 +72,7 @@ impl Type {
             Type::Any => "Any".to_string(),
             Type::Null => "Null".to_string(),
             Type::Type(actual_type) => actual_type.clone(),
+            Type::Nullable(ty) => format!("{}{}", "?", ty.get_string()),
         }
     }
 }

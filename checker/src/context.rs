@@ -3,8 +3,11 @@
 // Il y a deux tables: les alias, les variables
 
 use base_language::r#type::{Type, BaseType};
+use base_language::Language;
+use base_language::identifier::Identifier;
+use base_language::language_struct::LanguageStruct;
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 enum Origin {
     BaseType(Type),
     From(String)
@@ -24,7 +27,7 @@ struct Context {
     variables: Vec<(String, String)> 
 }
 
-#[derive(PartialEq, Debug, Copy)]
+#[derive(PartialEq, Debug, Copy, Clone)]
 enum Identity {
     Variable,
     Type,
@@ -88,8 +91,32 @@ impl Context {
         todo!();
     }
 
-    fn get_type_base_type(&self) -> Type {
+    fn get_type_base_type(&self, s:&str) -> Type {
         todo!();
     }
 
+    pub fn insert_variable(&self, term: &str, type_name: &str) -> Context {
+        Context {
+            alias: self.alias.clone(),
+            variables: self.variables.iter()
+                .chain([(term.to_string(), type_name.to_string())].iter())
+                .map(|x| x.clone())
+                .collect()
+        }
+    }
+
+    fn insert_identifier(&self, id: Identifier) -> Context {
+        self.insert_variable(&id.get_term(), &id.get_type_name())
+    }
+
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test(){
+        assert_eq!(2, 2);        
+    }
 }

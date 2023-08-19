@@ -62,12 +62,13 @@ impl NDF for NormalDisjunctiveForm {
        match t {
            Type::Scalar(s) => Self::scalar_to_ndf(s.clone()).set_type(Type::Scalar(s.clone())),
            Type::Vector(v, na) => Self::vector_to_ndf(v.clone(), na.clone()).set_type(Type::Vector(v.clone(), na.clone())),
-           Type::List(vt) => Self::list_to_ndf(vt.clone()).set_type(Type::List(vt.clone())),
+           Type::List(vt) => Self::list_to_ndf(vt.clone()),//.set_type(Type::List(vt.clone())),
            Type::Union(vt) =>Self::union_to_ndf(vt.clone()).set_type(Type::Union(vt.clone())),
            Type::Function(args, ret) => Self::function_to_ndf(args.clone(), ret.clone()).set_type(Type::Function(args.clone(), ret.clone())),
            Type::Any =>  Self::default().set_type(Type::Any),
            Type::Null => Self::default().set_type(Type::Null),
-           Type::Type(s) => Self::type_to_ndf(&s).set_type(Type::Type(s.clone()))
+           Type::Type(s) => Self::type_to_ndf(&s).set_type(Type::Type(s.clone())),
+           Type::Nullable(t) => Self::default().set_type(Type::Null).combine(NormalDisjunctiveForm::from_type(*t))
        } 
     }
 
@@ -88,7 +89,7 @@ impl NDF for NormalDisjunctiveForm {
            .map(|t| <NormalDisjunctiveForm as NDF>::from_type(t.clone()))
            .fold(
                NormalDisjunctiveForm::default(),
-               |acc, x| acc.combine(x))
+               |ndf, ty| ndf.combine(ty))
     }
 
     fn combine(&self, ndf: NormalDisjunctiveForm) -> NormalDisjunctiveForm {
